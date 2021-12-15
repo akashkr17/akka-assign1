@@ -23,11 +23,11 @@ object PingPongActorMain extends App {
         counter += 1
         sum += 1
 
-      case End(pingSum) => println(s"Sum: $pingSum Counter: $counter")
+      case End(pingSum) =>
+        println(s"Sum: $pingSum Counter: $counter")
         context.stop(self)
     }
   }
-
 
   class PongActor extends Actor with ActorLogging {
     var sum: Int = 0
@@ -55,7 +55,7 @@ object PingPongActorMain extends App {
   case object PingMessage
   case object PongMessage
   case object StartMessage
-  case class GetPongSum(sum : Option[Int])
+  case class GetPongSum(sum: Option[Int])
 
   val actorSystem: ActorSystem = ActorSystem("actorSystem")
   val pingActor: ActorRef = actorSystem.actorOf(Props[PingActor], "pingActor")

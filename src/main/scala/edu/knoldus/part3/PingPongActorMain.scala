@@ -26,20 +26,19 @@ object PingPongActorMain extends App {
           _ <- 1 to 10000
         } yield childRef ! PingMessage
 
-
       case PongMessage =>
         counter += 1
         sum += 1
 
+      case SendGetPongSum => childRef ! GetPongSum(None)
 
-
-case SendGetPongSum => childRef ! GetPongSum(None)
-
-case  GetPongSum(pongSum) => println(s"Pong sum: $pongSum")
+      case GetPongSum(pongSum) =>
+        println(s"Pong sum: $pongSum")
         sender ! ThrowException
-      case End(pingSum) => println(s"Sum: $pingSum Counter: $counter")
+      case End(pingSum) =>
+        println(s"Sum: $pingSum Counter: $counter")
         println("end")
-            sender ! GetPongSum(None)
+        sender ! GetPongSum(None)
     }
   }
 
@@ -84,12 +83,11 @@ case  GetPongSum(pongSum) => println(s"Pong sum: $pongSum")
   case object StopMessage
   case class ThrowException()
   case object SendGetPongSum
-  case class GetPongSum(sum : Option[Int])
+  case class GetPongSum(sum: Option[Int])
   import PingActor._
   val actorSystem: ActorSystem = ActorSystem("actorSystem")
   val pingActor = actorSystem.actorOf(Props[PingActor], "pingActor")
   pingActor ! StartMessage
   pingActor ! SendGetPongSum
-
 
 }
