@@ -1,35 +1,32 @@
 package edu.knoldus.part1
 
-import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 
 object PingPongActorMain extends App {
 
-  object PingActor {
-    case class CreateChildActor(name: String)
-  }
-
   class PingActor extends Actor with ActorLogging {
-    import PingActor._
+    println(s"${self.path}: Creating new actor")
+    val childRef: ActorRef = context.actorOf(Props[PongActor], "pongActor")
     override def receive: Receive = {
-      case CreateChildActor(name) =>
-        println(s"${self.path}: Creating new actor")
-        val childRef = context.actorOf(Props[PongActor], name)
-        childRef ! "ping"
-      case message => log.info(message.toString)
+      case StartMessage =>
+        childRef ! PingMessage
+      case PongMessage => log.info("pong")
     }
   }
 
   class PongActor extends Actor with ActorLogging {
     override def receive: Receive = {
-      case message =>
-        log.info(message.toString)
-        sender() ! "pong"
+      case PingMessage =>
+        log.info("ping")
+        sender ! PongMessage
     }
   }
 
+  case object PingMessage
+  case object PongMessage
+  case object StartMessage
   val actorSystem: ActorSystem = ActorSystem("actorSystem")
   val pingActor = actorSystem.actorOf(Props[PingActor], "pingActor")
 
-  import PingActor._
-  pingActor ! CreateChildActor("pongActor")
+  pingActor ! StartMessage
 }
